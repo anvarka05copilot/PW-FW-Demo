@@ -1,0 +1,19 @@
+{
+  "name": "pw-fw-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "regression": "npx playwright test",
+    "sanity": "npx playwright test --grep @sanity",
+    "smoke-allure": "npx playwright test --grep @smoke --reporter=line,allure-playwright & npx allure generate ./allure-results -o ./allure-report --clean"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.20.2",
+    "allure-commandline": "^2.43.0",
+    "allure-playwright": "^3.12.1"
+  }
+}
