@@ -45,3 +45,11 @@ jobs:
         name: allure-report
         path: allure-report/
         retention-days: 30
+    # NEW: Deploy to GitHub Pages so you can view it in the browser
+    - name: Deploy Allure Report to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      if: ${{ !cancelled() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./allure-report
+        destination_dir: allure-report
