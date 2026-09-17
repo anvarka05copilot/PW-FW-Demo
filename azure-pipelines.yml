@@ -1,21 +1,75 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+name: Playwright Tests
 
+# Trigger on pushes to main or master
 trigger:
-- main
+  branches:
+    include:
+      - main
+      - master
 
-pool:
-  vmImage: ubuntu-latest
+# Trigger on Pull Requests to main or master
+pr:
+  branches:
+    include:
+      - main
+      - master
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+# Manual trigger parameters
+parameters:
+  - name: suite
+    displayName: 'Test suite to run'
+    type: string
+    default: 'regression'
+    values:
+      - regression
+      - sanity
+      - smoke-allure
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+jobs:
+  - job: Test
+    timeoutInMinutes: 60
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+      # Checkout the repository
+      - checkout: self
+
+      # Setup Node.js
+      - task: NodeTool@0
+        inputs:
+          versionSpec: 'lts/*'
+        displayName: 'Install Node.js'
+
+      # Install npm dependencies
+      - script: npm ci
+        displayName: 'Install dependencies'
+
+      # Install Playwright browsers
+      - script: npx playwright install --with-deps
+        displayName: 'Install Playwright Browsers'
+
+      # Run the selected test suite
+      - script: npm run ${{ parameters.suite }}
+        displayName: 'Run Playwright tests'
+
+      # Generate Allure Report
+      - script: npx allure generate allure-results --clean -o allure-report
+        displayName: 'Generate Allure Report'
+        condition: always() # Runs even if tests fail
+
+      # Publish Playwright Report as an artifact
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Playwright Report'
+        inputs:
+          targetPath: 'playwright-report/'
+          artifact: 'playwright-report'
+        condition: always()
+
+      # Publish Allure Report as an artifact
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Allure Report'
+        inputs:
+          targetPath: 'allure-report/'
+          artifact: 'allure-report'
+        condition: always()
