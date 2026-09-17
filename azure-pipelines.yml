@@ -38,7 +38,7 @@ jobs:
       # Setup Node.js
       - task: NodeTool@0
         inputs:
-          versionSpec: 'lts/*'
+          versionSpec: '24.15.0'
         displayName: 'Install Node.js'
 
       # Install npm dependencies
